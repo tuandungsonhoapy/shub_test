@@ -11,9 +11,18 @@ const Task3 = () => {
 
   const fetchData = async () => {
     try {
-      const inputResponse = await axios.get(
-        'https://share.shub.edu.vn/api/intern-test/input'
-      )
+      let inputResponse
+      try {
+        inputResponse = await axios.get(
+          'https://share.shub.edu.vn/api/intern-test/input'
+        )
+      } catch (error: any) {
+        console.error(
+          'Primary request failed, trying fallback:',
+          error.message
+        )
+        inputResponse = await axios.get('http://localhost:8088/proxy/input')
+      }
       const { token, data, query } = inputResponse.data
 
       const result = query.map(
@@ -57,6 +66,20 @@ const Task3 = () => {
           }
         }
       ).then(() => console.log('Success'))
+        .catch(() => {
+          axios
+            .post('http://localhost:8088/proxy/output', result, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            })
+            .then(() => {
+              console.log('Success')
+            })
+            .catch((fallbackError) => {
+              console.error(fallbackError)
+            })
+        })
     } catch (error) {
       console.error('error:', error)
     }

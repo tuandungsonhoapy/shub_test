@@ -26,6 +26,40 @@ app.get('/api/download-file', async (req, res) => {
 	}
 })
 
+app.get('/proxy/input', async (req, res) => {
+	try {
+		const response = await axios.get(
+			'https://share.shub.edu.vn/api/intern-test/input'
+		)
+		res.json(response.data)
+	} catch (error) {
+		res.status(500).json({
+			message: 'Error fetching data',
+			error: error.message
+		})
+	}
+})
+
+app.post('/proxy/output', async (req, res) => {
+	try {
+		const response = await axios.post(
+			'https://share.shub.edu.vn/api/intern-test/output',
+			req.body,
+			{
+				headers: {
+					Authorization: req.headers.authorization
+				}
+			}
+		)
+		res.json(response.data)
+	} catch (error) {
+		res.status(500).json({
+			message: 'Error sending data',
+			error: error.message
+		})
+	}
+})
+
 app.listen(PORT, () => {
 	console.log(`Server running on http://localhost:${PORT}`)
 })
